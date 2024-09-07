@@ -11,15 +11,23 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.nio.file.Path;
 import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api")
 public class ProductController {
     @Autowired
     private ProductRepository repository;
+
+    private static final String THUMBNAIL_DIR = "src/main/resources/static/thumbnails/";
+
 
     @GetMapping(value="/product/all")
     public Iterable<Product> getProducts(){
@@ -51,6 +59,63 @@ public class ProductController {
         } catch (Exception e) {
             // Handle any exceptions, such as if the product doesn't exist
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+        }
+    }
+
+    // 상품 수정
+    @PatchMapping(value="/edit/product/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable String id, @RequestBody Product updatedProduct) {
+        Optional<Product> existingProduct = repository.findById(id);
+
+        if (existingProduct.isPresent()) {
+            Product product = existingProduct.get();
+            product.setName(updatedProduct.getName());
+            product.setPrice(updatedProduct.getPrice());
+            product.setExplanation(updatedProduct.getExplanation());
+            repository.save(product);
+            return ResponseEntity.ok(product);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+        }
+    }
+
+    @PatchMapping(value = "/edit/product/thumbnail/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<?> uploadThumbnail(@PathVariable String id, @RequestParam("thumbnail") MultipartFile file) {
+        Optional<Product> existingProduct = repository.findById(id);
+
+        if (existingProduct.isPresent()) {
+            Product product = existingProduct.get();
+            // Store the file in the specified directory
+            String filePath = storeFile(file);  // Store the file and get the relative path
+            product.setThumbnail(filePath);
+            repository.save(product);
+            return ResponseEntity.ok(product);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
+        }
+    }
+
+    // Store the file locally in the /resources/static/thumbnails directory
+    private String storeFile(MultipartFile file) {
+        try {
+            // Create directory if it doesn't exist
+            Path directory = Paths.get(THUMBNAIL_DIR);
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory);
+            }
+
+            // Generate a unique file name (e.g., use the original file name or generate a UUID)
+            String originalFilename = file.getOriginalFilename();
+            String uniqueFilename = System.currentTimeMillis() + "_" + originalFilename;
+            Path filePath = Paths.get(THUMBNAIL_DIR + uniqueFilename);
+
+            // Save the file to the directory
+            Files.write(filePath, file.getBytes());
+
+            // Return the relative path for access from the web
+            return "thumbnails/" + uniqueFilename + "?v=" + System.currentTimeMillis();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file", e);
         }
     }
 
