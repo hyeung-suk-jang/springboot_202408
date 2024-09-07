@@ -1,24 +1,24 @@
 package com.packt.cardatabase.web;
 
-import com.packt.cardatabase.domain.CarRepository;
-import com.packt.cardatabase.domain.Owner;
 import com.packt.cardatabase.domain.Product;
 import com.packt.cardatabase.domain.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
-import java.nio.file.Path;
-import java.util.Optional;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -39,7 +39,27 @@ public class ProductController {
         return repository.findById(id);
     }
 
-// delete
+    // 상품 생성 엔드포인트
+    @PostMapping(value = "/create/product")
+    public ResponseEntity<?> createProduct(@RequestBody Product newProduct) {
+        try {
+            // ID가 없으면 UUID 생성하여 설정
+            if (newProduct.getId() == null || newProduct.getId().isEmpty()) {
+                newProduct.setId(UUID.randomUUID().toString());
+            }
+            // 새 상품 데이터베이스에 저장
+            Product savedProduct = repository.save(newProduct);
+            Map<String, Object> response = new HashMap<>();
+            response.put("product", savedProduct);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create product: " + e.getMessage());
+        }
+    }
+
+
+    // delete
     @DeleteMapping(value="/delete/product/{id}")
     public ResponseEntity<?>  deleteProduct(@PathVariable String id){
         try {
