@@ -26,7 +26,7 @@ public class ProductController {
     @Autowired
     private ProductRepository repository;
 
-    private static final String THUMBNAIL_DIR = "src/main/resources/static/thumbnails/";
+    private static final String EXTERNAL_THUMBNAIL_DIR  = "/uploads/thumbnails/";
 
 
     @GetMapping(value="/product/all")
@@ -99,15 +99,15 @@ public class ProductController {
     private String storeFile(MultipartFile file) {
         try {
             // Create directory if it doesn't exist
-            Path directory = Paths.get(THUMBNAIL_DIR);
+            Path directory = Paths.get(EXTERNAL_THUMBNAIL_DIR);
             if (!Files.exists(directory)) {
                 Files.createDirectories(directory);
             }
 
-            // Generate a unique file name (e.g., use the original file name or generate a UUID)
+            // Generate a unique file name
             String originalFilename = file.getOriginalFilename();
             String uniqueFilename = System.currentTimeMillis() + "_" + originalFilename;
-            Path filePath = Paths.get(THUMBNAIL_DIR + uniqueFilename);
+            Path filePath = Paths.get(EXTERNAL_THUMBNAIL_DIR + uniqueFilename);
 
             // Save the file to the directory
             Files.write(filePath, file.getBytes());
