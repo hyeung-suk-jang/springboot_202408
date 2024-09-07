@@ -1,9 +1,11 @@
 package com.packt.cardatabase.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 
+@Data
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
@@ -20,28 +22,4 @@ public class Product {
 
     @Column(nullable = true)
     private Long discount;
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getExplanation() {
-        return explanation;
-    }
-
-    public Long getPrice() {
-        return price;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public Long getDiscount() {
-        return discount;
-    }
 }

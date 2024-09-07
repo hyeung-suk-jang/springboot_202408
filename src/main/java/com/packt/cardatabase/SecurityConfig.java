@@ -53,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.authenticationEntryPoint(exceptionHandler).and()
 		.addFilterBefore(authenticationFilter, 
 				UsernamePasswordAuthenticationFilter.class);
-	}	
+	}
 
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {

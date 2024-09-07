@@ -33,7 +33,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		String path = httpRequest.getRequestURI();
 
-		if (path.startsWith("/api/product") || path.startsWith("/join")) {
+		if (path.startsWith("/api/product/all") || path.startsWith("/join")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -55,9 +55,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 				return;
 			}
-
 		}
-
 		filterChain.doFilter(request, response);
 	}
 }
